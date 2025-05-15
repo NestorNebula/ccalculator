@@ -12,6 +12,7 @@ Number add(Number n1, Number n2);
 /*
  * subtract:
  * Subtracts n1 and n2 and returns the difference.
+ */
 Number subtract(Number n1, Number n2);
 
 /*
