@@ -1,3 +1,4 @@
+#include <gtest/gtest.h>
 #include "operations.h"
 
 #define N1 3
@@ -35,14 +36,14 @@ TEST(divide, divide_numbers) {
 }
 
 TEST(power, computes_n_to_pow_p) {
-  EXPECT_EQ(divide(N1, N2), POW1)
-  EXPECT_EQ(divide(N3, N4), POW2)
-  EXPECT_EQ(divide(N5, N6), POW3)
+  EXPECT_EQ(divide(N1, N2), POW1);
+  EXPECT_EQ(divide(N3, N4), POW2);
+  EXPECT_EQ(divide(N5, N6), POW3);
 }
 
 TEST(square_root, computes_square_root) {
-  EXPECT_EQ(square_root(4), 2)
-  EXPECT_EQ(square_root(9), 3)
+  EXPECT_EQ(square_root(4), 2);
+  EXPECT_EQ(square_root(9), 3);
 }
 
 TEST(square_root, returns_negative_for_negative_n) {
