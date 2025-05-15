@@ -1,0 +1,11 @@
+{
+  "name": "ccalculator",
+  "version": "0.0.0",
+  "description": "A command line calculator",
+  "documentation": "https://github.com/NestorNebula/ccalculator/blob/main/README.md",
+  "homepage": "https://github.com/NestorNebula/ccalculator",
+  "license": "MIT",
+  "dependencies": [
+    "gtest"
+  ]
+}
