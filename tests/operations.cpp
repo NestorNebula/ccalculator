@@ -1,5 +1,8 @@
-#include <gtest/gtest.h>
-#include "operations.h"
+#include "gtest/gtest.h"
+
+extern "C" {
+  #include "operations.h"
+}
 
 #define N1 3
 #define N2 2
@@ -8,8 +11,8 @@
 #define N5 -1
 #define N6 -8
 #define POW1 9
-#define POW2 0
-#define POW3 -1
+#define POW2 INFINITY
+#define POW3 1
 
 TEST(add, adds_numbers) {
   EXPECT_EQ(add(N1, N2), N1 + N2);
@@ -30,15 +33,15 @@ TEST(multiply, multiply_numbers) {
 }
 
 TEST(divide, divide_numbers) {
-  EXPECT_EQ(divide(N1, N2), N1 / (Number) N2);
-  EXPECT_EQ(divide(N3, N4), N3 / (Number) N4);
-  EXPECT_EQ(divide(N5, N6), N5 / (Number) N6);
+  EXPECT_FLOAT_EQ(divide(N1, N2), N1 / (Number) N2);
+  EXPECT_FLOAT_EQ(divide(N3, N4), N3 / (Number) N4);
+  EXPECT_FLOAT_EQ(divide(N5, N6), N5 / (Number) N6);
 }
 
 TEST(power, computes_n_to_pow_p) {
-  EXPECT_EQ(divide(N1, N2), POW1);
-  EXPECT_EQ(divide(N3, N4), POW2);
-  EXPECT_EQ(divide(N5, N6), POW3);
+  EXPECT_EQ(power(N1, N2), POW1);
+  EXPECT_EQ(power(N3, N4), POW2);
+  EXPECT_EQ(power(N5, N6), POW3);
 }
 
 TEST(square_root, computes_square_root) {
