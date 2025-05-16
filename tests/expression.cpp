@@ -89,7 +89,7 @@ TEST(delete_current_level, sets_prev_level_as_current_level) {
   push_number(e, N2);
   delete_current_level(e);
   Level l = get_current_level(e);
-  EXPECT_EQ(l->n1, N1);
+  EXPECT_EQ(l->numbers[0], N1);
   delete_expression(e);
 }
 
