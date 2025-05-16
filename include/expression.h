@@ -29,7 +29,7 @@ Number push_number(Expression e, Number n);
  * Pushes os to the operator signs stored in the current level of e.
  * Returns os if it was correctly pushed, -1 if an error occurred.
  */
-int push_operator(Expression e, OperatorSign op);
+int push_operator(Expression e, OperationSign os);
 
 /*
  * add_level:
