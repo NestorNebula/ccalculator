@@ -1,7 +1,7 @@
 #ifndef OPERATIONS_H
 #define OPERATIONS_H
 
-typedef double Number;
+#include "types.h"
 
 /*
  * add:
