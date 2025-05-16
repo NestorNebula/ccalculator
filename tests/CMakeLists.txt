@@ -6,18 +6,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(ccalculator_test
         LANGUAGES C CXX)
 
-add_executable(ccalculator_tests ccalculator_tests.cpp)
+add_executable(ccalculator_tests ccalculator_tests.cpp operations.cpp)
+target_include_directories(ccalculator_tests PRIVATE ../include)
 
-add_library(tests STATIC operations.cpp)
-target_include_directories(tests PRIVATE ../include)
-
-add_library(src_files STATIC ../src/*.c)
-target_include_directories(src_files PRIVATE ../include)
+file(GLOB src_files ../src/*.c)
+add_library(src STATIC ${src_files})
+target_include_directories(src PRIVATE ../include)
 
 find_package(GTest REQUIRED)
 
 enable_testing()
 
-target_link_libraries(ccalculator_tests GTest::gtest_main src_files)
-
-gtest_discover_tests(ccalculator_tests)
+target_link_libraries(ccalculator_tests GTest::gtest src)
