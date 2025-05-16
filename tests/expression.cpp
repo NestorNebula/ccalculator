@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 extern "C" {
   #include "expression.h"
@@ -14,7 +15,7 @@ extern "C" {
 
 TEST(new_expression, creates_expression) {
   Expression e = new_expression();
-  EXPECT_THAT(e, NotNull());
+  EXPECT_THAT(e, ::testing::NotNull());
   delete_expression(e);
 }
 
@@ -34,10 +35,10 @@ TEST(push_operator, returns_pushed_operator) {
 TEST(push_number, returns_nan_on_error) {
   Expression e = new_expression();
   push_number(e, N1);
-  EXPECT_THAT(push_number(e, N2), isNaN());
-  push_operator(e, OP1);
-  EXPECT_THAT(push_number(e, N2);
-  EXPECT_THAT(push_number(e, N3), !isNaN());
+  EXPECT_THAT(push_number(e, N2), ::testing::IsNan());
+  push_operator(e, OS1);
+  EXPECT_EQ(push_number(e, N2), N2);
+  EXPECT_THAT(push_number(e, N3), ::testing::IsNan());
   delete_expression(e);
 }
 
@@ -55,20 +56,20 @@ TEST(push_operator, returns_minus_one_on_error) {
 TEST(add_level, creates_level) {
   Expression e = new_expression();
   Level l = add_level(e);
-  EXPECT_THAT(ex, NotNull());
+  EXPECT_THAT(e, ::testing::NotNull());
   delete_expression(e);
 }
 
 TEST(get_current_level, returns_level) {
   Expression e = new_expression();
   Level l = get_current_level(e);
-  EXPECT_THAT(*l, A<struct level_type>());
+  EXPECT_THAT(*l, ::testing::A<struct level_type>());
   delete_expression(e);
 }
 
 TEST(current_level_full, returns_false_when_level_not_full) {
   Expression e = new_expression();
-  EXPECT_FALSE(current_level_full());
+  EXPECT_FALSE(current_level_full(e));
   delete_expression(e);
 }
 
@@ -78,7 +79,7 @@ TEST(current_level_full, returns_true_when_level_is_full) {
   push_operator(e, OS1);
   push_number(e, N2);
   push_operator(e, OS2);
-  EXPECT_TRUE(current_level_full());
+  EXPECT_TRUE(current_level_full(e));
   delete_expression(e);
 }
 
@@ -96,7 +97,7 @@ TEST(delete_current_level, sets_prev_level_as_current_level) {
 TEST(delete_current_level, clears_only_level) {
   Expression e = new_expression();
   push_number(e, N1);
-  delete_current_level;
+  delete_current_level(e);
   Level l = get_current_level(e);
   EXPECT_EQ(l->n_count, 0);
   delete_expression(e);
@@ -104,8 +105,8 @@ TEST(delete_current_level, clears_only_level) {
 
 TEST(level_count, returns_number_of_levels) {
   Expression e = new_expression();
-  for (int i = 0; i <= 10; i++) {
-    EXPECT_EQ(level_countt(), i);
+  for (int i = 1; i <= 10; i++) {
+    EXPECT_EQ(level_count(e), i);
     add_level(e);
   }
   delete_expression(e);
