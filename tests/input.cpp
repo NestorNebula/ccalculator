@@ -76,6 +76,29 @@ TEST(get_next_char, returns_weof_if_no_character_found) {
   delete_input(ip);
 }
 
+TEST(hint_next_char, returns_next_char_without_advancing) {
+  FILE *stream = tmpfile();
+  char test_str[] = "Test";
+  fputs(test_str, stream);
+  rewind(stream);
+
+  Input ip = new_input();
+  read_input(ip, stream);
+  for (int i = 0; i < strlen(test_str); i++) {
+    EXPECT_EQ(hint_next_char(ip), 'T');
+  }
+  delete_input(ip);
+}
+
+TEST(hint_next_char, returns_weof_if_no_character_found) {
+  FILE *stream = tmpfile();
+
+  Input ip = new_input();
+  read_input(ip, stream);
+  EXPECT_EQ(hint_next_char(ip), WEOF);
+  delete_input(ip);
+}
+
 TEST(end_of_input, returns_false_while_input_not_fully_read) {
   FILE *stream = tmpfile();
   char test_str[] = "Test";
