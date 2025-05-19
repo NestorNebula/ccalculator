@@ -11,7 +11,7 @@ TEST(set_error, returns_pointer_to_error_description) {
 }
 
 TEST(set_error, works_with_formatted_errors) {
-  EXPECT_STREQ("Error 418", set_error("Error %d", 418);
+  EXPECT_STREQ("Error 418", set_error("Error %d", 418));
 }
 
 TEST(clear_error, returns_pointer_to_empty_description) {
