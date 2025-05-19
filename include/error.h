@@ -11,7 +11,7 @@
  * Returns a pointer to the error's description or a null pointer
  * if no space was available to store the description.
  */
-char *set_error(const char *err, va_list arg); 
+char *set_error(const char *err, ...); 
 
 /*
  * clear_error:
@@ -37,6 +37,6 @@ void print_error(FILE *stream);
  * A shortcut for set_error(err), print_error() and exit(EXIT_FAILURE).
  * Prints err, formatted with arg, if any, to stream before exiting the program.
  */
-void exit_with_error(FILE *stream, const char *err, va_list arg);
+void exit_with_error(FILE *stream, const char *err, ...);
 
 #endif
