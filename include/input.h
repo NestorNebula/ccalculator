@@ -46,6 +46,14 @@ Number get_next_number(Input ip);
 wint_t get_next_char(Input ip);
 
 /*
+ * hint_next_char:
+ * Same as get_next_char but doesn't advance to the 
+ * next character after reading. Thus, the next searching function call
+ * will restart at the same location.
+ */
+wint_t hint_next_char(Input ip);
+
+/*
  * end_of_input:
  * Returns true if the end of the input stored in ip was reached by a call
  * of any search function, false otherwise.
