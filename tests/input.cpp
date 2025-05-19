@@ -33,7 +33,9 @@ TEST(get_next_number, returns_next_number) {
   Input ip = new_input();
   read_input(ip, stream);
   EXPECT_EQ(get_next_number(ip), 1);
+  get_next_char(ip);
   EXPECT_EQ(get_next_number(ip), 23);
+  get_next_char(ip);
   EXPECT_EQ(get_next_number(ip), 456);
   delete_input(ip);
 }
@@ -83,7 +85,7 @@ TEST(end_of_input, returns_false_while_input_not_fully_read) {
   Input ip = new_input();
   read_input(ip, stream);
   get_next_char(ip);
-  EXPECT_THAT(end_of_input(ip), ::testing::IsFalse());
+  EXPECT_FALSE(end_of_input(ip));
   delete_input(ip);
 }
 
@@ -97,6 +99,6 @@ TEST(end_of_input, returns_true_when_input_fully_read) {
   read_input(ip, stream);
   get_next_number(ip);
   get_next_char(ip);
-  EXPECT_THAT(end_of_input(ip), ::testing::IsTrue());
+  EXPECT_TRUE(end_of_input(ip)); 
   delete_input(ip);
 }
