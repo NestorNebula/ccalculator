@@ -7,11 +7,11 @@ extern "C" {
 }
 
 TEST(set_error, returns_pointer_to_error_description) {
-  EXPECT_STREQ("Error", *set_error("Error"));
+  EXPECT_STREQ("Error", set_error("Error"));
 }
 
 TEST(clear_error, returns_pointer_to_empty_description) {
-  EXPECT_STREQ("", *clear_error());
+  EXPECT_STREQ("", clear_error());
 }
 
 TEST(has_error, returns_false_when_error_status_is_inactive) {
@@ -41,7 +41,9 @@ TEST(exit_with_error, prints_error_description_in_stream) {
   char err[] = "Error";
   char err_cpy[sizeof(err)];
 
-  EXPECT_EXIT(exit_with_error(err, stream), EXIT_FAILURE, "");
+  EXPECT_EXIT(exit_with_error(err, stream),
+              ::testing::ExitedWithCode(EXIT_FAILURE), "");
+  rewind(stream);
   fgets(err_cpy, sizeof(err_cpy), stream);
   EXPECT_STREQ(err, err_cpy);
 }
