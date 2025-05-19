@@ -24,9 +24,9 @@ void delete_input(Input ip);
  * read_input:
  * Reads from stream until a new line of the end of file is reached.
  * Stores the string read inside ip for other functions calls.
- * Returns the number of characters read.
+ * Returns the number of characters read or -1 if an error occurred.
  */
-unsigned int read_input(Input ip, FILE * stream);
+int read_input(Input ip, FILE * stream);
 
 /*
  * get_next_number:
