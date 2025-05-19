@@ -49,14 +49,26 @@ Number get_next_number(Input ip) {
   if (!iswdigit(*ip->current)) return NAN;
   Number n;
   swscanf(ip->current, L"%lf", &n);
-  while (iswdigit(*ip->current)) ip->current++;
+  bool point_read = false;
+  for (;;) {
+    wchar_t ch = *ip->current;
+    if (iswdigit(ch)) ip->current++;
+    else if (ch == '.' && !point_read) {
+      ip->current++;
+      point_read = true;
+    } else break;
+  }
   return n;
 }
 
 wint_t get_next_char(Input ip) {
   if (end_of_input(ip)) return WEOF;
-  wchar_t ch = *ip->current++;
-  return ch;
+  return *ip->current++;
+}
+
+wint_t hint_next_char(Input ip) {
+  if (end_of_input(ip)) return WEOF;
+  return *ip->current;
 }
 
 bool end_of_input(Input ip) {
