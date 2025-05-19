@@ -6,7 +6,8 @@
 /*
  * set_error:
  * Sets error status to active and error description to err.
- * Returns a pointer to the error's description.
+ * Returns a pointer to the error's description or a null pointer
+ * if no space was available to store the description.
  */
 char *set_error(const char *err);
 
