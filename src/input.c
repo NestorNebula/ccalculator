@@ -46,10 +46,12 @@ int read_input(Input ip, FILE * stream) {
 }
 
 Number get_next_number(Input ip) {
-  if (!iswdigit(*ip->current)) return NAN;
+  if (!iswdigit(*ip->current) && 
+      (!(*ip->current == '-') ||!iswdigit(*(ip->current + 1)))) return NAN;
   Number n;
   swscanf(ip->current, L"%lf", &n);
   bool point_read = false;
+  if (n < 0) ip->current++;
   for (;;) {
     wchar_t ch = *ip->current;
     if (iswdigit(ch)) ip->current++;
