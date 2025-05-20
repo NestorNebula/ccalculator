@@ -73,6 +73,10 @@ wint_t hint_next_char(Input ip) {
   return *ip->current;
 }
 
+void reset(Input ip) {
+  ip->current = ip->content;
+}
+
 bool end_of_input(Input ip) {
   return *ip->current == '\0';
 }
