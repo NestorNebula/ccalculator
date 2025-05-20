@@ -57,7 +57,8 @@ TEST(exit_with_error, works_with_formatted_errors) {
   char err[] = "Error 418";
   char err_cpy[sizeof(err)];
 
-  exit_with_error(stream, "Error %d", 418);
+  EXPECT_EXIT(exit_with_error(stream, "Error %d", 418), 
+               ::testing::ExitedWithCode(EXIT_FAILURE), "");
   rewind(stream);
   fgets(err_cpy, sizeof(err_cpy), stream);
   EXPECT_STREQ(err, err_cpy);
