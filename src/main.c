@@ -22,8 +22,8 @@ wint_t handle_character(Expression e, Input ip, wchar_t ch);
  * handle_variable_name
  * Reads variable name from input. Stops at first non-alphabetical character.
  * If first_char is alphabetical, adds it to the beginning of the string.
- * Returns a pointer to the name string if no error occured, 
- * else returns a null pointer otherwise.
+ * Returns a pointer to the name string if no error occurred, 
+ * else returns a null pointer.
  */
 char *handle_variable_name(Input ip, char first_char);
 
@@ -48,6 +48,14 @@ Number handle_operation(OperationSign os, Number n1, Number n2);
  * Returns the result if it could be computed, NaN otherwise.
  */
 Number resolve_level(Level lvl);
+
+/*
+ * search_variable_as_result:
+ * Checks if ip sets expression's result as a variable.
+ * If so, creates or gets the variable and returns a pointer to its name,
+ * else, returns a null pointer.
+ */
+char *search_variable_as_result(Input ip);
 
 int main(void) {
   setlocale(LC_ALL, "en_US.UTF-8");
@@ -79,6 +87,8 @@ int main(void) {
     printf("Enter an expression: ");
     read_input(ip, stdin);
 
+    char *variable_name = search_variable_as_result(ip);
+
     while (!end_of_input(ip)) {
       Number n = get_next_number(ip);
       if (isnan(n)) {
@@ -100,8 +110,13 @@ int main(void) {
       if (isnan(result) || level_count(e) != 1) {
         fprintf(stderr, "Error during final calculation. "
                 "Please check the expression's syntax.\n");
-      } else {
+      } else if (!variable_name) {
         printf("Expression's result: %g\n", result);
+      } else if (!isnan(get_variable(variable_name))) {
+        update_variable(variable_name, result);
+      } else {
+        printf("Expression's result (%g) couldn't be set as %s.\n",
+               result, variable_name);
       }
     } else {
       print_error(stderr);
@@ -118,7 +133,13 @@ wint_t handle_character(Expression e, Input ip, wchar_t ch) {
   }
   Level lvl = get_current_level(e);
   if (ch == sroot) {
-    Number n = get_next_number(ip);
+    Number n;
+    if (isdigit(hint_next_char(ip))) {
+      n = get_next_number(ip);
+    } else {
+      char *variable_name = handle_variable_name(ip, '\0');
+      n = get_variable(variable_name);
+    }
     if (isnan(n)) return -1;
     n = square_root(n);
     if (n < 0 || isnan(handle_number(e, ip, n))) return -1;
@@ -145,8 +166,8 @@ wint_t handle_character(Expression e, Input ip, wchar_t ch) {
           Number n = get_variable(variable_name);
           if (!isnan(n)) {
             handle_number(e, ip, n);
+            return n;
           } 
-          return n;
         }
       }
       return -1;
@@ -178,7 +199,12 @@ char *handle_variable_name(Input ip, char first_char) {
 Number handle_number(Expression e, Input ip, Number n) {
   if (hint_next_char(ip) == '^') {
     get_next_char(ip);
-    Number p = get_next_number(ip);
+    Number p;
+    if (isdigit(hint_next_char(ip))) p = get_next_number(ip);
+    else {
+      char *variable_name = handle_variable_name(ip, '\0');
+      p = get_variable(variable_name);
+    }
     if (isnan(p)) return NAN;
     n = power(n, p);
   }
@@ -227,4 +253,20 @@ Number resolve_level(Level lvl) {
   }
   if (lvl->os_count != 1) return NAN;
   return handle_operation(lvl->op_signs[0], lvl->numbers[0], lvl->numbers[1]);
+}
+
+char *search_variable_as_result(Input ip) {
+  wint_t ch;
+  while (isspace(ch = get_next_char(ip)));
+  if (isalpha(ch)) {
+    char *variable_name = handle_variable_name(ip, ch);
+    if (variable_name == NULL) return variable_name;
+    while (isspace(ch = get_next_char(ip)));
+    if (ch == '=') {
+      if (isnan(get_variable(variable_name))) add_variable(variable_name, 0);
+      return variable_name;
+    }
+  }
+  reset(ip);
+  return NULL;
 }
