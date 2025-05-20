@@ -99,6 +99,20 @@ TEST(hint_next_char, returns_weof_if_no_character_found) {
   delete_input(ip);
 }
 
+TEST(reset, reset_position_to_beginning_of_input) {
+  FILE *stream = tmpfile();
+  char test_str[] = "Test";
+  fputs(test_str, stream);
+  rewind(stream);
+
+  Input ip = new_input();
+  read_input(ip, stream);
+  get_next_char(ip);
+  get_next_char(ip);
+  reset(ip);
+  EXPECT_EQ(get_next_char(ip), 'T');
+}
+
 TEST(end_of_input, returns_false_while_input_not_fully_read) {
   FILE *stream = tmpfile();
   char test_str[] = "Test";
