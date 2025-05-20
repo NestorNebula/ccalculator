@@ -54,9 +54,15 @@ wint_t get_next_char(Input ip);
 wint_t hint_next_char(Input ip);
 
 /*
+ * reset:
+ * Sets current position back to the beginning of the input.
+ */
+void reset(Input ip);
+
+/*
  * end_of_input:
- * Returns true if the end of the input stored in ip was reached by a call
- * of any search function, false otherwise.
+ * Returns true if the current position is at the end of the input,
+ * false otherwise.
  */
 bool end_of_input(Input ip);
 
