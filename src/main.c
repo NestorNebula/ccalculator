@@ -5,6 +5,9 @@
 #include "expression.h"
 #include "input.h"
 #include "error.h"
+#include "variable.h"
+
+#define DEF_VNAME_LEN 10
 
 wchar_t sroot;
 
@@ -16,11 +19,20 @@ wchar_t sroot;
 wint_t handle_character(Expression e, Input ip, wchar_t ch);
 
 /*
+ * handle_variable_name
+ * Reads variable name from input. Stops at first non-alphabetical character.
+ * If first_char is alphabetical, adds it to the beginning of the string.
+ * Returns a pointer to the name string if no error occured, 
+ * else returns a null pointer otherwise.
+ */
+char *handle_variable_name(Input ip, char first_char);
+
+/*
  * handle_number:
  * Updates e based on the value of n.
  * Returns n if number could be handled without error, NaN otherwise.
  */
-Number handle_number(Expression e, Number n);
+Number handle_number(Expression e, Input ip, Number n);
 
 /*
  * handle_operation:
@@ -75,17 +87,8 @@ int main(void) {
           set_error("Error around character '%lc'.\n", ch);
           break;
         }
-      } else {
-        if (hint_next_char(ip) == '^') {
-          get_next_char(ip);
-          Number p = get_next_number(ip);
-          if (isnan(p)) {
-            set_error("Error around character '%lc'.\n", p);
-            break;
-          }
-          n = power(n, p);
-        }
-        if (isnan(handle_number(e, n))) {
+      } else {   
+        if (isnan(handle_number(e, ip, n))) {
           set_error("Error around number %g.\n", n);
           break;
         }
@@ -118,7 +121,7 @@ wint_t handle_character(Expression e, Input ip, wchar_t ch) {
     Number n = get_next_number(ip);
     if (isnan(n)) return -1;
     n = square_root(n);
-    if (n < 0 || isnan(handle_number(e, n))) return -1;
+    if (n < 0 || isnan(handle_number(e, ip, n))) return -1;
     else return ch;
   }
 
@@ -131,19 +134,54 @@ wint_t handle_character(Expression e, Input ip, wchar_t ch) {
       Number lvl_result;
       lvl_result = resolve_level(lvl);
       delete_current_level(e);
-      if (isnan(handle_number(e, lvl_result))) return -1;
+      if (isnan(handle_number(e, ip, lvl_result))) return -1;
       break;
     case ' ':
       break;
     default:
+      if (isalpha(ch)) {
+        char *variable_name = handle_variable_name(ip, ch);
+        if (variable_name != NULL) {
+          Number n = get_variable(variable_name);
+          if (!isnan(n)) {
+            handle_number(e, ip, n);
+          } 
+          return n;
+        }
+      }
       return -1;
   }
 
   return ch;
 }
-      
 
-Number handle_number(Expression e, Number n) {
+char *handle_variable_name(Input ip, char first_char) {
+  char *variable_name = malloc(DEF_VNAME_LEN+1);
+  if (variable_name == NULL) return variable_name;
+  unsigned int size = DEF_VNAME_LEN, length = 0;
+  if (iswalpha(first_char)) {
+    variable_name[length++] = first_char;
+  } 
+  while (iswalpha(hint_next_char(ip))) {
+    char next_char = get_next_char(ip);
+    if (length == size) {
+      variable_name = realloc(variable_name, size * 2);
+      if (variable_name == NULL) return variable_name;
+      size *= 2;
+    }
+    variable_name[length++] = next_char;
+  }
+  variable_name[length] = '\0';
+  return variable_name;
+}
+
+Number handle_number(Expression e, Input ip, Number n) {
+  if (hint_next_char(ip) == '^') {
+    get_next_char(ip);
+    Number p = get_next_number(ip);
+    if (isnan(p)) return NAN;
+    n = power(n, p);
+  }
   if (current_level_full(e)) {
     Level lvl = get_current_level(e);
     Number result;
