@@ -6,7 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(ccalculator_test
         LANGUAGES C CXX)
 
-add_executable(ccalculator_tests ccalculator_tests.cpp operations.cpp)
+file(GLOB tests_files *.cpp)
+add_executable(ccalculator_tests ${tests_files})
 target_include_directories(ccalculator_tests PRIVATE ../include)
 
 file(GLOB src_files ../src/*.c)
