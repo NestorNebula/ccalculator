@@ -3,16 +3,24 @@
 #include <stdio.h>
 #include "error.h"
 
+#define DEF_LEN 10
+
 struct error {
   bool status;
   char *description;
 } Error = { false, NULL };
 
-char *set_error (const char *err) {
+char *set_error (const char *err, ...) {
   Error.status = true;
-  Error.description = realloc(Error.description, strlen(err) + 1);
-  if (Error.description == NULL) return Error.description;
-  strcpy(Error.description, err);
+  unsigned int length = DEF_LEN;
+  va_list ap;
+  do {
+    length *= 2;
+    Error.description = realloc(Error.description, length + 1);
+    va_start(ap, err);
+    if (Error.description == NULL) return Error.description;
+    va_end(ap);
+  } while (vsnprintf(Error.description, length + 1, err, ap) > length); 
   return Error.description;
 }
 
@@ -31,7 +39,10 @@ void print_error(FILE *stream) {
   fputs(Error.description, stream);
 }
 
-void exit_with_error(const char *err, FILE *stream) {
-  fputs(err, stream);
+void exit_with_error(FILE *stream, const char *err, ...) {
+  va_list ap;
+  va_start(ap, err);
+  vfprintf(stream, err, ap);
+  va_end(ap);
   exit(EXIT_FAILURE);
 }
