@@ -34,6 +34,8 @@ void delete_input(Input ip) {
 int read_input(Input ip, FILE * stream) {
   int count = 0;
   for (wint_t ch; (ch = getwc(stream)) != '\n' && ch != WEOF; count++) {
+
+    // Update content size for the input to fit in
     if (ip->length + 1 == ip->size) {
       ip->content = realloc(ip->content, 2 * ip->size * sizeof(wchar_t));
       if (ip->content == NULL) return -1;
@@ -41,21 +43,29 @@ int read_input(Input ip, FILE * stream) {
     }
     ip->content[ip->length++] = ch;
   }
+  
+  // Set current pointer to the beginning of the input
   ip->current = ip->content;
   return count;
 }
 
 Number get_next_number(Input ip) {
+  /*  Check that current char is either a digit or a 
+      negative sign followed by a digit. */
   if (!iswdigit(*ip->current) && 
       (!(*ip->current == '-') ||!iswdigit(*(ip->current + 1)))) return NAN;
+
   Number n;
   swscanf(ip->current, L"%lf", &n);
+
+  // Advance current pointer until the character following the number
   bool point_read = false;
   if (n < 0) ip->current++;
   for (;;) {
     wchar_t ch = *ip->current;
     if (iswdigit(ch)) ip->current++;
     else if (ch == '.' && !point_read) {
+      // Allow one '.' in number
       ip->current++;
       point_read = true;
     } else break;

@@ -10,8 +10,11 @@ struct variable {
 } *first = NULL;
 
 Number add_variable(const char *name, Number n) {
+  // Create variable only if it doesn't exist
   if (isnan(get_variable(name))) {
     struct variable *prev = NULL, *next = first;
+
+    // Order variable alphabetically
     while (next != NULL && strcmp(name, next->name) > 0) {
       prev = next;
       next = next->next;
@@ -34,7 +37,10 @@ Number get_variable(const char *name) {
   while (var != NULL) {
     int cmp = strcmp(name, var->name);
     if (!cmp) return var->value;
+    
+    // Stop if var would have been before current variable (alphabetically)
     if (cmp < 0) break;
+
     var = var->next;
   }
   return NAN;
@@ -48,7 +54,10 @@ Number update_variable(const char *name, Number n) {
       var->value = n;
       return n;
     }
+
+    // Stop if var would have been before current variable (alphabetically)
     if (cmp < 0) break;
+
     var = var->next;
   }
   return NAN;
@@ -68,7 +77,10 @@ Number delete_variable(const char *name) {
       free(var);
       return n;
     }
+
+    // Stop if var would have been before current variable (alphabetically)
     if (cmp < 0) break;
+
     prev = var;
     var = var->next;
   }

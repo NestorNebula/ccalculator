@@ -6,6 +6,13 @@ struct expression_type {
   Level current_level;
 };
 
+/*
+ * init_level:
+ * Creates a level and initializes its members.
+ * Sets level's prev member to prev.
+ * Returns a pointer to the new level if enough memory could be allocated,
+ * else returns a null pointer.
+ */
 static Level init_level(Level prev) {
   Level lvl = malloc(sizeof(struct level_type));
   if (lvl == NULL) return lvl;
@@ -27,6 +34,7 @@ Expression new_expression(void) {
 }
 
 void delete_expression(Expression e) {
+  // Releases memory used by all expression's levels
   for (Level tmp = e->current_level; tmp != NULL; tmp = e->current_level) {
     e->current_level = tmp->prev;
     free(tmp);
@@ -37,18 +45,20 @@ void delete_expression(Expression e) {
 
 Number push_number(Expression e, Number n) {
   if (current_level_full(e)) return NAN;
+
+  // Push number only if preceded by an operator or if number is first number
   if (e->current_level->n_count != e->current_level->os_count) return NAN;
-  e->current_level->numbers[e->current_level->n_count] = n;
-  e->current_level->n_count++;
+  e->current_level->numbers[e->current_level->n_count++] = n;
   return n;
 }
 
 
 int push_operator(Expression e, OperationSign os) {
   if (current_level_full(e)) return -1;
+  
+  // Push operator only if preceded by a number
   if (e->current_level->n_count == e->current_level->os_count) return -1;
-  e->current_level->op_signs[e->current_level->os_count] = os;
-  e->current_level->os_count++;
+  e->current_level->op_signs[e->current_level->os_count++] = os;
   return os;
 }
 
@@ -70,6 +80,7 @@ bool current_level_full(Expression e) {
 
 void delete_current_level(Expression e) {
   if (level_count(e) == 1) {
+    // Clears only level
     e->current_level->n_count = e->current_level->os_count = 0;
   } else {
     Level tmp = e->current_level;

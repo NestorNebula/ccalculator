@@ -6,6 +6,8 @@
 extern wchar_t sroot;
 
 int main(void) {
+  /* Set language to english (US) and mode to UTF-8 
+     to guarantee square root code */
   setlocale(LC_ALL, "en_US.UTF-8");
   mbtowc(&sroot, "\xe2\x88\x9a", 3);
 
@@ -23,6 +25,7 @@ int main(void) {
          "//Prints 3\n%lcx\n",
          sroot, sroot, sroot);
 
+  // Read and resolve expressions until fatal error or empty input
   for (;;) {
     Expression e = new_expression();
     if (e == NULL) {
@@ -30,6 +33,7 @@ int main(void) {
       break;
     }
 
+    // Clear previous expression error
     clear_error();
 
     printf("\nEnter an expression: ");
@@ -42,6 +46,7 @@ int main(void) {
 
     char *variable_name = search_variable_as_result(ip);
 
+    // Read input and start resolving expression 
     while (!end_of_input(ip)) {
       Number n = get_next_number(ip);
       if (isnan(n)) {
@@ -50,6 +55,7 @@ int main(void) {
       } else if (isnan(handle_number(e, ip, n))) break;
     }
 
+    // Try to resolve expression's final level if no error occurred
     if (!has_error()) {
       Number result = resolve_level(get_current_level(e));
       if (isnan(result)) {
@@ -62,6 +68,7 @@ int main(void) {
                   "Make sure to complete each open bracket "
                   "by a close bracket.\n");
       } else if (!variable_name) {
+        // Print expression's result if no variable to define
         printf("%g\n", result);
       } else if (isnan(update_variable(variable_name, result))) {
         set_error("Expression's result (%g) couldn't be set as %s.\n",
@@ -69,6 +76,7 @@ int main(void) {
       }
     }
 
+    // Print error that occurred during expression resolution
     if (has_error()) {
       print_error(stderr);
       if (variable_name) delete_variable(variable_name);

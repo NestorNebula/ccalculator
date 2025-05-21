@@ -12,8 +12,11 @@ struct error {
 
 char *set_error (const char *err, ...) {
   Error.status = true;
+
   unsigned int length = DEF_LEN;
   va_list ap;
+
+  // Allocate correct size for error description and store it
   do {
     length *= 2;
     Error.description = realloc(Error.description, length + 1);
@@ -26,6 +29,8 @@ char *set_error (const char *err, ...) {
 
 char *clear_error(void) {
   Error.status = false;
+  
+  // Clear error description
   Error.description = realloc(Error.description, 1);
   *Error.description = '\0';
   return Error.description;
