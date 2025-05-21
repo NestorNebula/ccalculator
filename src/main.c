@@ -161,6 +161,11 @@ Input create_input_expression(void) {
   wint_t ch;
 
   FILE *tmp = tmpfile();
+  if (tmp == NULL) {
+    set_error("Not enough memory to process input.\n");
+    delete_input(user_input);
+    return NULL;
+  }
 
   if (search_variable_as_result(user_input) != NULL) {
     reset(user_input);
@@ -193,6 +198,10 @@ Input create_input_expression(void) {
   rewind(tmp);
 
   Input expression_input = new_input();
+  if (expression_input == NULL) {
+    set_error("Not enough memory to store expression\n");
+    return expression_input;
+  }
   read_input(expression_input, tmp);
   return expression_input;
 }
