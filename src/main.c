@@ -174,7 +174,7 @@ Input create_input_expression(void) {
     if (isnan(n)) {
       ch = get_next_char(user_input);
       if (IS_SYNTAX(ch) || isspace(ch)) {
-        fputc(ch, tmp);
+        fputwc(ch, tmp);
       } else if (isalpha(ch)) {
         char *var = handle_variable_name(user_input, ch);
         n = get_variable(var);
