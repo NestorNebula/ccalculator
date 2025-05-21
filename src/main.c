@@ -117,16 +117,8 @@ int main(void) {
       Number n = get_next_number(ip);
       if (isnan(n)) {
         wint_t ch = get_next_char(ip);
-        if (handle_character(e, ip, ch) == -1) {
-          set_error("Error around character '%lc'.\n", ch);
-          break;
-        }
-      } else {   
-        if (isnan(handle_number(e, ip, n))) {
-          set_error("Error around number %g.\n", n);
-          break;
-        }
-      }
+        if (handle_character(e, ip, ch) == -1) break;
+      } else if (isnan(handle_number(e, ip, n))) break;
     }
 
     if (!has_error()) {
@@ -137,7 +129,9 @@ int main(void) {
         } else break;
         if (variable_name) delete_variable(variable_name);
       } else if (level_count(e) != 1) {
-        set_error("Too many nested levels. Check the expression's syntax.\n");
+        set_error("Too many nested levels. "
+                  "Make sure to complete each open bracket "
+                  "by a close bracket.\n");
       } else if (!variable_name) {
         printf("%g\n", result);
       } else if (isnan(update_variable(variable_name, result))) {
@@ -190,6 +184,7 @@ Input create_input_expression(void) {
         n = get_variable(var);
         if (isnan(n)) {
           set_error("Non-existent variable name: %s\n", var);
+          delete_input(user_input);
           return NULL;
         } else fprintf(tmp, "%lf", n);
         free(var);
@@ -213,22 +208,24 @@ Input create_input_expression(void) {
 }
 
 wint_t handle_character(Expression e, Input ip, wchar_t ch) {
-  if (ch == '+' || ch == '-' || ch == '*' || ch == '/') {
-    return push_operator(e, ch);
+  if (IS_OPERATOR(ch)) {
+    if(push_operator(e, ch) == -1) {
+      set_error("Error with '%lc' operator. "
+                "Check that it is used correctly (between two numbers)\n");
+      return -1;
+    } else return ch;
   }
   Level lvl = get_current_level(e);
-  if (ch == sroot) {
-    Number n;
-    if (isdigit(hint_next_char(ip))) {
-      n = get_next_number(ip);
-    } else {
-      char *variable_name = handle_variable_name(ip, '\0');
-      n = get_variable(variable_name);
-    }
-    if (isnan(n)) return -1;
-    n = square_root(n);
-    if (n < 0 || isnan(handle_number(e, ip, n))) return -1;
-    else return ch;
+  if (IS_SQRT(ch)) {
+    Number n = square_root(get_next_number(ip));
+    if (n < 0) {
+      set_error("Can't compute the square root of a negative number.\n");
+    } else if (isnan(handle_number(e, ip, n))) {
+      set_error("Error with square root number. "
+                "Check that it is used correctly "
+                "(separated from other numbers by operators)\n");
+    } else return ch;
+    return -1;
   }
 
   switch (ch) {
@@ -236,25 +233,24 @@ wint_t handle_character(Expression e, Input ip, wchar_t ch) {
       add_level(e);
       break;
     case ')':
-      if (level_count(e) == 1) return -1;
+      if (level_count(e) == 1) {
+        set_error("Unexpected ')' character. No nested level to close. "
+                  "Make sure to use an open bracket before a close bracket.\n");
+        return -1;
+      }
       Number lvl_result;
       lvl_result = resolve_level(lvl);
       delete_current_level(e);
-      if (isnan(handle_number(e, ip, lvl_result))) return -1;
-      break;
-    case ' ':
+      if (isnan(handle_number(e, ip, lvl_result))) {
+        set_error("Error when computing expression between square brackets. "
+                  "Check that the expression's syntax is "
+                  "valid and non-empty.\n");
+        return -1;
+      }
       break;
     default:
-      if (isalpha(ch)) {
-        char *variable_name = handle_variable_name(ip, ch);
-        if (variable_name != NULL) {
-          Number n = get_variable(variable_name);
-          if (!isnan(n)) {
-            handle_number(e, ip, n);
-            return n;
-          } 
-        }
-      }
+      if (isspace(ch)) break;
+      set_error("Unexpected character: %lc\n", ch);
       return -1;
   }
 
@@ -271,7 +267,7 @@ char *handle_variable_name(Input ip, char first_char) {
   while (iswalpha(hint_next_char(ip))) {
     char next_char = get_next_char(ip);
     if (length == size) {
-      variable_name = realloc(variable_name, size * 2);
+      variable_name = realloc(variable_name, size * 2 + 1);
       if (variable_name == NULL) return variable_name;
       size *= 2;
     }
@@ -290,7 +286,12 @@ Number handle_number(Expression e, Input ip, Number n) {
       char *variable_name = handle_variable_name(ip, '\0');
       p = get_variable(variable_name);
     }
-    if (isnan(p)) return NAN;
+    if (isnan(p)) {
+      set_error("Invalid value after '^' symbol. "
+                "The correct syntax is n^p where n and p are numbers "
+                "or variables represenging numbers.\n");
+      return NAN;
+    }
     n = power(n, p);
   }
   if (current_level_full(e)) {
@@ -309,8 +310,13 @@ Number handle_number(Expression e, Input ip, Number n) {
     }
     lvl->os_count--;
     return n;
+  } else if (push_number(e, n) == -1) {
+    set_error("Error with number %lf. "
+              "Make sure that it is used correctly "
+              "(separated from other numbers by operators.\n");
+    return -1;
   } else {
-    return push_number(e, n);
+    return n;
   }
 }
   
@@ -331,12 +337,21 @@ Number handle_operation(OperationSign os, Number n1, Number n2) {
 }
 
 Number resolve_level(Level lvl) {
-  if (!lvl->n_count) return NAN;
+  if (!lvl->n_count) {
+    set_error("No number in expression.\n");
+    return NAN;
+  }
   if (lvl->n_count == 1) {
-    if (lvl->os_count) return NAN;
+    if (lvl->os_count) {
+      set_error("Not enough numbers in expression.\n");
+      return NAN;
+    }
     return lvl->numbers[0];
   }
-  if (lvl->os_count != 1) return NAN;
+  if (lvl->os_count != 1) {
+    set_error("Not enough numbers in expression.\n");
+    return NAN;
+  }
   return handle_operation(lvl->op_signs[0], lvl->numbers[0], lvl->numbers[1]);
 }
 
