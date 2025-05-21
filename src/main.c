@@ -193,7 +193,7 @@ Input create_input_expression(void) {
         delete_input(user_input);
         return NULL;
       }
-    } else fprintf(tmp, "%g", n);
+    } else fprintf(tmp, "%lf", n);
   }
   delete_input(user_input);
   rewind(tmp);
