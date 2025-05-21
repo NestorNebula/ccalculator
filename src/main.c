@@ -62,12 +62,18 @@ int main(void) {
   mbtowc(&sroot, "\xe2\x88\x9a", 3);
 
   printf("\nThis programs prints the result of mathematical expressions.\n"
-         "The characters allowed apart from numbers and parentheses are: "
-         "'+', '-', '*' and '/' for mathematical operations, '^' for power "
-         "in the format \"p^n\" where p and n are numbers (not expressions) "
-         "and '%lc' for square root of n in format \"%lcn\" "
-         "where n is a number (not an expression).\n\n",
-         sroot, sroot);
+         "The characters allowed inside expressions apart from numbers "
+         "and parentheses are: '+', '-', '*' and '/' operation signs, "
+         "'^' for power in the format \"p^n\" where p and n are numbers "
+         "(not expressions) and '%lc' for square root of n in format \"%lcn\" "
+         "where n is a number (not an expression).\n\n"
+         "In the case of a \"normal\" expression, the result will be printed. "
+         "You can decide to redirect it and to assign its value to a "
+         "variable, you'll then be able to use that variable in other "
+         "expressions.\n"
+         "Example:\n\n//Prints 9\n3^2\n\n//Assigns 9 to x\nx = 3^2\n\n"
+         "//Prints 3\n%lcx\n\n",
+         sroot, sroot, sroot);
 
   for (;;) {
     Expression e = new_expression();
@@ -111,7 +117,7 @@ int main(void) {
         fprintf(stderr, "Error during final calculation. "
                 "Please check the expression's syntax.\n");
       } else if (!variable_name) {
-        printf("Expression's result: %g\n", result);
+        printf("%g\n", result);
       } else if (!isnan(get_variable(variable_name))) {
         update_variable(variable_name, result);
       } else {
