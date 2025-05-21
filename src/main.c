@@ -9,7 +9,26 @@
 
 #define DEF_VNAME_LEN 10
 
+#define IS_OPERATOR(ch) ((ch) == '+' || (ch) == '-' \
+                        || (ch) == '*' || ch == '/')
+#define IS_POW(ch) ((ch) == '^')
+#define IS_SQRT(ch) ((ch) == sroot)
+#define IS_START_BRACKET(ch) ((ch) == '(')
+#define IS_END_BRACKET(ch) ((ch) == ')')
+#define IS_BRACKET(ch) (IS_START_BRACKET(ch) || IS_END_BRACKET(ch))
+#define IS_SYNTAX(ch) (IS_OPERATOR(ch) || IS_POW(ch) \
+                      || IS_SQRT(ch) || IS_BRACKET(ch))
+
 wchar_t sroot;
+
+/*
+ * create_input_expression:
+ * Reads user input and convert it into an Input corresponding 
+ * to a valid expression.
+ * Returns a pointer to an Input if no error occurred, else
+ * sets an error and returns a null pointer.
+ */
+Input create_input_expression(void);
 
 /*
  * handle_character:
@@ -81,17 +100,16 @@ int main(void) {
       printf("Not enough memory to store a new expression.\n");
       break;
     }
-    Input ip = new_input();
-    if (ip == NULL) {
-      printf("Not enough memory to store a new input.\n");
-      delete_expression(e);
-      break;
-    }
 
     clear_error();
 
     printf("Enter an expression: ");
-    read_input(ip, stdin);
+    Input ip = create_input_expression();
+    if (ip == NULL) {
+      print_error(stderr);
+      delete_expression(e);
+      break;
+    }
 
     char *variable_name = search_variable_as_result(ip);
 
@@ -131,6 +149,52 @@ int main(void) {
     delete_expression(e);
     delete_input(ip);
   }
+}
+
+Input create_input_expression(void) {
+  Input user_input = new_input();
+  if (user_input == NULL) {
+    set_error("Not enough memory to store a new input.\n");
+    return NULL;
+  }
+  read_input(user_input, stdin);
+  wint_t ch;
+
+  FILE *tmp = tmpfile();
+
+  if (search_variable_as_result(user_input) != NULL) {
+    reset(user_input);
+    do {
+      ch = get_next_char(user_input);
+      fputc(ch, tmp);
+    } while (ch != '=');
+  }
+  while(!end_of_input(user_input)) {
+    Number n = get_next_number(user_input);
+    if (isnan(n)) {
+      ch = get_next_char(user_input);
+      if (IS_SYNTAX(ch) || isspace(ch)) {
+        fputc(ch, tmp);
+      } else if (isalpha(ch)) {
+        char *var = handle_variable_name(user_input, ch);
+        n = get_variable(var);
+        if (isnan(n)) {
+          set_error("Non-existent variable name: %ls\n", var);
+        } else fprintf(tmp, "%g", n);
+        free(var);
+      } else {
+        set_error("Invalid character in expression: %lc\n", ch);
+        delete_input(user_input);
+        return NULL;
+      }
+    } else fprintf(tmp, "%g", n);
+  }
+  delete_input(user_input);
+  rewind(tmp);
+
+  Input expression_input = new_input();
+  read_input(expression_input, tmp);
+  return expression_input;
 }
 
 wint_t handle_character(Expression e, Input ip, wchar_t ch) {
