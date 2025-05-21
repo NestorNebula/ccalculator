@@ -134,13 +134,13 @@ int main(void) {
       if (isnan(result) || level_count(e) != 1) {
         fprintf(stderr, "Error during final calculation. "
                 "Please check the expression's syntax.\n");
+        if (variable_name) delete_variable(variable_name);
       } else if (!variable_name) {
         printf("%g\n", result);
-      } else if (!isnan(get_variable(variable_name))) {
-        update_variable(variable_name, result);
-      } else {
+      } else if (isnan(update_variable(variable_name, result))) {
         printf("Expression's result (%g) couldn't be set as %s.\n",
                result, variable_name);
+        delete_variable(variable_name);
       }
     } else {
       print_error(stderr);
@@ -184,8 +184,9 @@ Input create_input_expression(void) {
         char *var = handle_variable_name(user_input, ch);
         n = get_variable(var);
         if (isnan(n)) {
-          set_error("Non-existent variable name: %ls\n", var);
-        } else fprintf(tmp, "%g", n);
+          set_error("Non-existent variable name: %s\n", var);
+          return NULL;
+        } else fprintf(tmp, "%lf", n);
         free(var);
       } else {
         set_error("Invalid character in expression: %lc\n", ch);
@@ -342,7 +343,7 @@ char *search_variable_as_result(Input ip) {
     if (variable_name == NULL) return variable_name;
     while (isspace(ch = get_next_char(ip)));
     if (ch == '=') {
-      if (isnan(get_variable(variable_name))) add_variable(variable_name, 0);
+      if (isnan(get_variable(variable_name))) add_variable(variable_name, NAN);
       return variable_name;
     }
   }
