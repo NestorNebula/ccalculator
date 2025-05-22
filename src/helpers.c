@@ -202,11 +202,11 @@ Number handle_number(Expression e, Input ip, Number n) {
     }
     lvl->os_count--;
     return n;
-  } else if (push_number(e, n) == -1) {
-    set_error("Error with number %lf. "
+  } else if (isnan(push_number(e, n))) {
+    set_error("Error with number %g. "
               "Make sure that it is used correctly "
-              "(separated from other numbers by operators.\n");
-    return -1;
+              "(separated from other numbers by operators).\n", n);
+    return NAN;
   } else {
     return n;
   }
