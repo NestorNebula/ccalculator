@@ -102,7 +102,8 @@ wint_t handle_character(Expression e, Input ip, wchar_t ch) {
     } else if (isnan(handle_number(e, ip, n))) {
       set_error("Error with square root number. "
                 "Check that it is used correctly "
-                "(separated from other numbers by operators)\n");
+                "(separated from other numbers by operators) "
+                "and in the correct format.\n");
     } else return ch;
     return -1;
   }
