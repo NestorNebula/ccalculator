@@ -60,7 +60,7 @@ int main(void) {
       Number result = resolve_level(get_current_level(e));
       if (isnan(result)) {
         if (variable_name) {
-          set_error("No expression, delete %s\n", variable_name);
+          set_error("\"%s\" deleted.\n", variable_name);
         } else break;
         if (variable_name) delete_variable(variable_name);
       } else if (level_count(e) != 1) {

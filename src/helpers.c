@@ -59,7 +59,7 @@ Input create_input_expression(void) {
         char *var = handle_variable_name(user_input, ch);
         n = get_variable(var);
         if (isnan(n)) {
-          set_error("Non-existent variable name: %s\n", var);
+          set_error("\"%s\" isn't defined.\n", var);
           delete_input(user_input);
           return NULL;
         } else fprintf(tmp, "%lf", n);
@@ -165,7 +165,7 @@ char *handle_variable_name(Input ip, char first_char) {
 
 Number handle_number(Expression e, Input ip, Number n) {
   // Compute n^p if n followed by '^'
-  if (hint_next_char(ip) == '^') {
+  if (IS_POW(hint_next_char(ip))) {
     get_next_char(ip);
     Number p;
     if (isdigit(hint_next_char(ip))) p = get_next_number(ip);
@@ -176,8 +176,7 @@ Number handle_number(Expression e, Input ip, Number n) {
     }
     if (isnan(p)) {
       set_error("Invalid value after '^' symbol. "
-                "The correct syntax is n^p where n and p are numbers "
-                "or variables represenging numbers.\n");
+                "The correct syntax is n^p where p is a number.\n");
       return NAN;
     }
     n = power(n, p);
